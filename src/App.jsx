@@ -109,52 +109,91 @@ export default function App() {
     return e.hora_entrada && !e.saida && duracaoMs(e) > 30 * 60 * 1000
   }
 
+  // chip de situação: rótulo + classe de cor
+  function situacao(e) {
+    if (e.saida) return { texto: 'Saiu', classe: 'chip-saiu' }
+    if (!e.hora_entrada) return { texto: 'Por entrar', classe: 'chip-pendente' }
+    if (excede30(e)) return { texto: '+30 min', classe: 'chip-aviso' }
+    return { texto: 'Dentro', classe: 'chip-dentro' }
+  }
+
   // só conta como "dentro" quem já deu entrada e ainda não saiu
   const dentro = entradas.filter((e) => e.hora_entrada && !e.saida).length
   const totalPago = entradas.reduce((s, e) => s + Number(e.valor_pago || 0), 0)
 
   return (
     <div className="container">
-      <h1>Portaria do Evento</h1>
+      <header className="topo">
+        <div className="topo-titulo">
+          <span className="logo">🎟️</span>
+          <div>
+            <h1>Portaria do Evento</h1>
+            <p className="subtitulo">Gestão de entradas e saídas</p>
+          </div>
+        </div>
+      </header>
 
       <div className="stats">
-        <div className="stat">
-          <span className="num">{entradas.length}</span>
-          <span className="label">Total registos</span>
+        <div className="stat stat-total">
+          <span className="stat-icon">📋</span>
+          <div className="stat-info">
+            <span className="num">{entradas.length}</span>
+            <span className="label">Registos</span>
+          </div>
         </div>
-        <div className="stat">
-          <span className="num">{dentro}</span>
-          <span className="label">Dentro</span>
+        <div className="stat stat-dentro">
+          <span className="stat-icon">🟢</span>
+          <div className="stat-info">
+            <span className="num">{dentro}</span>
+            <span className="label">Dentro</span>
+          </div>
         </div>
-        <div className="stat">
-          <span className="num">{totalPago.toFixed(2)} €</span>
-          <span className="label">Total recebido</span>
+        <div className="stat stat-pago">
+          <span className="stat-icon">💶</span>
+          <div className="stat-info">
+            <span className="num">{totalPago.toFixed(2)} €</span>
+            <span className="label">Recebido</span>
+          </div>
         </div>
       </div>
 
       <form onSubmit={adicionar} className="form">
-        <input
-          placeholder="Nome"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-        />
-        <input
-          placeholder="Nº telemóvel"
-          value={numeroTlm}
-          onChange={(e) => setNumeroTlm(e.target.value)}
-        />
-        <input
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="Valor pago (€)"
-          value={valorPago}
-          onChange={(e) => setValorPago(e.target.value)}
-        />
-        <button type="submit">Novo Registo</button>
+        <h2 className="form-titulo">Adicionar pessoa</h2>
+        <div className="form-campos">
+          <label className="campo">
+            <span>Nome</span>
+            <input
+              placeholder="Ex.: Maria Silva"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+            />
+          </label>
+          <label className="campo">
+            <span>Telemóvel</span>
+            <input
+              placeholder="9xx xxx xxx"
+              value={numeroTlm}
+              onChange={(e) => setNumeroTlm(e.target.value)}
+            />
+          </label>
+          <label className="campo campo-valor">
+            <span>Valor pago (€)</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              value={valorPago}
+              onChange={(e) => setValorPago(e.target.value)}
+            />
+          </label>
+        </div>
+        <button type="submit" className="btn-novo">
+          + Novo Registo
+        </button>
       </form>
 
-      {erro && <p className="erro">Erro: {erro}</p>}
+      {erro && <p className="erro">⚠️ {erro}</p>}
 
       {loading ? (
         <p>A carregar…</p>
@@ -164,19 +203,21 @@ export default function App() {
             <tr>
               <th>Nome</th>
               <th>Telemóvel</th>
+              <th>Situação</th>
               <th>Entrada</th>
               <th>Saída</th>
               <th>Tempo</th>
               <th>Pago</th>
-              <th>Estado</th>
+              <th>Ação</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {entradas.length === 0 && (
               <tr>
-                <td colSpan={8} className="vazio">
-                  Ainda sem registos.
+                <td colSpan={9} className="vazio">
+                  <span className="vazio-emoji">📭</span>
+                  Ainda sem registos. Adiciona a primeira pessoa acima.
                 </td>
               </tr>
             )}
@@ -191,6 +232,11 @@ export default function App() {
                   {e.nome}
                 </td>
                 <td data-label="Telemóvel">{e.numero_tlm || '—'}</td>
+                <td data-label="Situação">
+                  <span className={`chip ${situacao(e).classe}`}>
+                    {situacao(e).texto}
+                  </span>
+                </td>
                 <td data-label="Entrada">
                   {e.hora_entrada
                     ? new Date(e.hora_entrada).toLocaleTimeString('pt-PT', {
@@ -209,7 +255,7 @@ export default function App() {
                 </td>
                 <td data-label="Tempo">{tempoDentro(e)}</td>
                 <td data-label="Pago">{Number(e.valor_pago).toFixed(2)} €</td>
-                <td data-label="Estado">
+                <td data-label="Ação">
                   {!e.hora_entrada ? (
                     <button className="btn-entrada" onClick={() => darEntrada(e)}>
                       Dar entrada
