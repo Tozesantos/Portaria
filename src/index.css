@@ -113,6 +113,11 @@ h1 {
   opacity: 0.55;
 }
 
+/* dentro há mais de 30 min — fundo claro de aviso */
+.tabela tr.excede-30 td {
+  background: #fef9c3;
+}
+
 .vazio {
   text-align: center;
   color: #999;
@@ -210,6 +215,15 @@ h1 {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     margin-bottom: 12px;
     padding: 4px 0;
+  }
+
+  /* no cartão, o fundo de aviso fica no proprio cartao */
+  .tabela tr.excede-30 {
+    background: #fef9c3;
+  }
+
+  .tabela tr.excede-30 td {
+    background: transparent;
   }
 
   .tabela td {

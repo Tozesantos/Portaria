@@ -81,10 +81,19 @@ export default function App() {
     else carregar()
   }
 
-  function tempoDentro(e) {
+  function duracaoMs(e) {
     const inicio = new Date(e.hora_entrada).getTime()
     const fim = e.saida && e.hora_saida ? new Date(e.hora_saida).getTime() : agora
-    return formatarDuracao(fim - inicio)
+    return fim - inicio
+  }
+
+  function tempoDentro(e) {
+    return formatarDuracao(duracaoMs(e))
+  }
+
+  // destaca quem está dentro há mais de 30 minutos
+  function excede30(e) {
+    return !e.saida && duracaoMs(e) > 30 * 60 * 1000
   }
 
   const dentro = entradas.filter((e) => !e.saida).length
@@ -158,7 +167,12 @@ export default function App() {
               </tr>
             )}
             {entradas.map((e) => (
-              <tr key={e.id} className={e.saida ? 'saiu' : ''}>
+              <tr
+                key={e.id}
+                className={`${e.saida ? 'saiu' : ''} ${
+                  excede30(e) ? 'excede-30' : ''
+                }`.trim()}
+              >
                 <td data-label="Nome" className="cel-nome">
                   {e.nome}
                 </td>
