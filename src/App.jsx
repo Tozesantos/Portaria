@@ -159,15 +159,17 @@ export default function App() {
             )}
             {entradas.map((e) => (
               <tr key={e.id} className={e.saida ? 'saiu' : ''}>
-                <td>{e.nome}</td>
-                <td>{e.numero_tlm || '—'}</td>
-                <td>
+                <td data-label="Nome" className="cel-nome">
+                  {e.nome}
+                </td>
+                <td data-label="Telemóvel">{e.numero_tlm || '—'}</td>
+                <td data-label="Entrada">
                   {new Date(e.hora_entrada).toLocaleTimeString('pt-PT', {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
                 </td>
-                <td>
+                <td data-label="Saída">
                   {e.saida && e.hora_saida
                     ? new Date(e.hora_saida).toLocaleTimeString('pt-PT', {
                         hour: '2-digit',
@@ -175,9 +177,9 @@ export default function App() {
                       })
                     : '—'}
                 </td>
-                <td>{tempoDentro(e)}</td>
-                <td>{Number(e.valor_pago).toFixed(2)} €</td>
-                <td>
+                <td data-label="Tempo">{tempoDentro(e)}</td>
+                <td data-label="Pago">{Number(e.valor_pago).toFixed(2)} €</td>
+                <td data-label="Estado">
                   <button
                     className={e.saida ? 'btn-saiu' : 'btn-dentro'}
                     onClick={() => alternarSaida(e)}
@@ -185,7 +187,7 @@ export default function App() {
                     {e.saida ? 'Saiu' : 'Marcar saída'}
                   </button>
                 </td>
-                <td>
+                <td data-label="" className="cel-apagar">
                   <button className="btn-apagar" onClick={() => apagar(e.id)}>
                     ✕
                   </button>

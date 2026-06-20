@@ -7,12 +7,17 @@ body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   background: #f4f5f7;
   color: #1a1a1a;
+  -webkit-text-size-adjust: 100%;
 }
 
 .container {
   max-width: 800px;
   margin: 0 auto;
   padding: 24px 16px 60px;
+  /* respeita o notch / barra inferior do iPhone */
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  padding-bottom: max(60px, env(safe-area-inset-bottom));
 }
 
 h1 {
@@ -57,21 +62,23 @@ h1 {
 .form input {
   flex: 1;
   min-width: 120px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-  font-size: 15px;
+  /* 16px evita o zoom automático do Safari no iOS ao focar o campo */
+  font-size: 16px;
 }
 
 .form button {
-  padding: 10px 18px;
+  padding: 12px 18px;
   border: none;
   border-radius: 8px;
   background: #2563eb;
   color: #fff;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .form button:hover {
@@ -116,10 +123,11 @@ h1 {
 .btn-saiu {
   border: none;
   border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 13px;
+  padding: 8px 12px;
+  font-size: 14px;
   cursor: pointer;
   color: #fff;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-dentro {
@@ -143,4 +151,114 @@ h1 {
   background: #fee2e2;
   padding: 10px;
   border-radius: 8px;
+}
+
+/* ---------- Telemóvel (iPhone e afins) ---------- */
+@media (max-width: 640px) {
+  .container {
+    padding-top: 16px;
+  }
+
+  h1 {
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+
+  .stats {
+    gap: 8px;
+  }
+
+  .stat {
+    padding: 12px 8px;
+  }
+
+  .stat .num {
+    font-size: 19px;
+  }
+
+  .stat .label {
+    font-size: 11px;
+  }
+
+  /* o formulário passa a uma coluna, tudo à largura toda */
+  .form {
+    flex-direction: column;
+  }
+
+  .form input,
+  .form button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* a tabela transforma-se em cartões empilhados */
+  .tabela,
+  .tabela tbody,
+  .tabela tr,
+  .tabela td {
+    display: block;
+    width: 100%;
+  }
+
+  .tabela thead {
+    display: none;
+  }
+
+  .tabela tr {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    margin-bottom: 12px;
+    padding: 4px 0;
+  }
+
+  .tabela td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: right;
+  }
+
+  /* etiqueta da coluna à esquerda de cada valor */
+  .tabela td::before {
+    content: attr(data-label);
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #6b7280;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .tabela td.cel-nome {
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .tabela td:last-child {
+    border-bottom: none;
+  }
+
+  /* o botão de saída ocupa a largura toda do cartão para ser fácil tocar */
+  .tabela td[data-label='Estado'] .btn-dentro,
+  .tabela td[data-label='Estado'] .btn-saiu {
+    flex: 1;
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .tabela td.cel-apagar {
+    justify-content: flex-end;
+  }
+
+  .tabela td.cel-apagar::before {
+    content: 'Apagar';
+  }
+
+  .btn-apagar {
+    font-size: 20px;
+    padding: 4px 8px;
+  }
 }
