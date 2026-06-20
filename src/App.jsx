@@ -25,7 +25,7 @@ export default function App() {
     const { data, error } = await supabase
       .from('entradas')
       .select('*')
-      .order('hora_entrada', { ascending: false })
+      .order('created_at', { ascending: false })
     if (error) setErro(error.message)
     else setEntradas(data)
     setLoading(false)
@@ -49,6 +49,7 @@ export default function App() {
       nome: nome.trim(),
       numero_tlm: numeroTlm.trim() || null,
       valor_pago: valorPago === '' ? 0 : Number(valorPago),
+      hora_entrada: null,
       saida: false,
     })
     if (error) {
@@ -59,6 +60,16 @@ export default function App() {
     setNumeroTlm('')
     setValorPago('')
     carregar()
+  }
+
+  // Dá a entrada: marca a hora de entrada e arranca o cronómetro.
+  async function darEntrada(entrada) {
+    const { error } = await supabase
+      .from('entradas')
+      .update({ hora_entrada: new Date().toISOString() })
+      .eq('id', entrada.id)
+    if (error) setErro(error.message)
+    else carregar()
   }
 
   async function alternarSaida(entrada) {
@@ -82,21 +93,24 @@ export default function App() {
   }
 
   function duracaoMs(e) {
+    if (!e.hora_entrada) return 0
     const inicio = new Date(e.hora_entrada).getTime()
     const fim = e.saida && e.hora_saida ? new Date(e.hora_saida).getTime() : agora
     return fim - inicio
   }
 
   function tempoDentro(e) {
+    if (!e.hora_entrada) return '—'
     return formatarDuracao(duracaoMs(e))
   }
 
   // destaca quem está dentro há mais de 30 minutos
   function excede30(e) {
-    return !e.saida && duracaoMs(e) > 30 * 60 * 1000
+    return e.hora_entrada && !e.saida && duracaoMs(e) > 30 * 60 * 1000
   }
 
-  const dentro = entradas.filter((e) => !e.saida).length
+  // só conta como "dentro" quem já deu entrada e ainda não saiu
+  const dentro = entradas.filter((e) => e.hora_entrada && !e.saida).length
   const totalPago = entradas.reduce((s, e) => s + Number(e.valor_pago || 0), 0)
 
   return (
@@ -137,7 +151,7 @@ export default function App() {
           value={valorPago}
           onChange={(e) => setValorPago(e.target.value)}
         />
-        <button type="submit">Registar entrada</button>
+        <button type="submit">Novo Registo</button>
       </form>
 
       {erro && <p className="erro">Erro: {erro}</p>}
@@ -178,10 +192,12 @@ export default function App() {
                 </td>
                 <td data-label="Telemóvel">{e.numero_tlm || '—'}</td>
                 <td data-label="Entrada">
-                  {new Date(e.hora_entrada).toLocaleTimeString('pt-PT', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                  {e.hora_entrada
+                    ? new Date(e.hora_entrada).toLocaleTimeString('pt-PT', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    : '—'}
                 </td>
                 <td data-label="Saída">
                   {e.saida && e.hora_saida
@@ -194,12 +210,18 @@ export default function App() {
                 <td data-label="Tempo">{tempoDentro(e)}</td>
                 <td data-label="Pago">{Number(e.valor_pago).toFixed(2)} €</td>
                 <td data-label="Estado">
-                  <button
-                    className={e.saida ? 'btn-saiu' : 'btn-dentro'}
-                    onClick={() => alternarSaida(e)}
-                  >
-                    {e.saida ? 'Saiu' : 'Marcar saída'}
-                  </button>
+                  {!e.hora_entrada ? (
+                    <button className="btn-entrada" onClick={() => darEntrada(e)}>
+                      Dar entrada
+                    </button>
+                  ) : (
+                    <button
+                      className={e.saida ? 'btn-saiu' : 'btn-dentro'}
+                      onClick={() => alternarSaida(e)}
+                    >
+                      {e.saida ? 'Saiu' : 'Marcar saída'}
+                    </button>
+                  )}
                 </td>
                 <td data-label="" className="cel-apagar">
                   <button className="btn-apagar" onClick={() => apagar(e.id)}>

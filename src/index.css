@@ -124,6 +124,7 @@ h1 {
   padding: 24px;
 }
 
+.btn-entrada,
 .btn-dentro,
 .btn-saiu {
   border: none;
@@ -133,6 +134,10 @@ h1 {
   cursor: pointer;
   color: #fff;
   -webkit-tap-highlight-color: transparent;
+}
+
+.btn-entrada {
+  background: #2563eb;
 }
 
 .btn-dentro {
@@ -255,7 +260,8 @@ h1 {
     border-bottom: none;
   }
 
-  /* o botão de saída ocupa a largura toda do cartão para ser fácil tocar */
+  /* o botão de estado ocupa a largura toda do cartão para ser fácil tocar */
+  .tabela td[data-label='Estado'] .btn-entrada,
   .tabela td[data-label='Estado'] .btn-dentro,
   .tabela td[data-label='Estado'] .btn-saiu {
     flex: 1;
